@@ -1,0 +1,169 @@
+[
+  {
+    "id": "persona_phuleswari",
+    "name": "Phuleswari Konwar",
+    "role": "Citizen (Applicant)",
+    "age": 70,
+    "dob": "12/03/1956",
+    "gender": "Female",
+    "marital_status": "Widowed",
+    "husband_name": "Late Biren Konwar",
+    "village": "Lakhipur",
+    "block": "Sonari",
+    "mobile": "9854011223",
+    "bank_account": "3876903950111",
+    "ifsc": "SBIN0003077",
+    "background": "Elderly widow assisted by her 19-year-old grandson Rahul on his smartphone. They visited the Sonari block counter last month.",
+    "dialect_and_tone": "Warm, respectful, colloquial rural phrasing ('Moi Phuleswari, grandson helping to apply for ₹250 pension').",
+    "goal": "Verify eligibility, request and verify OTP, attach voter card age proof, and submit Old Age Pension application.",
+    "expected_result": "Application accepted as PENDING, portal user account created with password as DOB (12031956), SUBMIT audit log recorded, SMS sent.",
+    "db_assertions": [
+      "Row exists in applications with status = 'PENDING'",
+      "Applicant name is 'Phuleswari Konwar' and block is 'Sonari'",
+      "Row exists in portal_users with mobile '9854011223' and password_hash = SHA256('12031956')",
+      "Audit log has action 'SUBMIT' by actor 'applicant:9854011223'"
+    ]
+  },
+  {
+    "id": "persona_bhaben",
+    "name": "Bhaben Hazarika",
+    "role": "Citizen (Inquiry / Status)",
+    "age": 65,
+    "dob": "18/06/1961",
+    "village": "Kathoni",
+    "block": "Dhemaji Pathar",
+    "mobile": "9217729489",
+    "background": "Senior citizen checking the status of his existing pension application and checking SLA timeline.",
+    "dialect_and_tone": "Direct, polite village elder ('Nomoskar, I submitted application, please check what happened').",
+    "goal": "Inquire about current application status and SLA timeline.",
+    "expected_result": "Existing application details retrieved accurately without side effects or database mutation.",
+    "db_assertions": [
+      "Application status successfully queried from database",
+      "No unintended mutations to database state"
+    ]
+  },
+  {
+    "id": "persona_gunaram",
+    "name": "Gunaram Barua",
+    "role": "Citizen (Underage Applicant)",
+    "age": 58,
+    "dob": "14/08/1968",
+    "gender": "Male",
+    "marital_status": "Married",
+    "village": "Namti Chariali",
+    "block": "Namti",
+    "mobile": "9435012345",
+    "bank_account": "7320086263999",
+    "ifsc": "PUNB0556610",
+    "background": "Tea garden laborer aged 58 who hopes he can get the pension early.",
+    "dialect_and_tone": "Informal, hopeful ('I am 58 years old, can I get ₹250 monthly pension now?').",
+    "goal": "Attempts to check eligibility and submit application despite being below statutory age 60.",
+    "expected_result": "Cleanly refused by eligibility check and application validation with clear explanation ('applicant must be 60 years of age or above').",
+    "db_assertions": [
+      "No row inserted into applications table for mobile '9435012345'",
+      "System of record remains pristine with zero ineligible records"
+    ]
+  },
+  {
+    "id": "persona_tara",
+    "name": "Tara Devi",
+    "role": "Citizen (Duplicate Prevention)",
+    "age": 67,
+    "dob": "24/09/1959",
+    "gender": "Female",
+    "marital_status": "Married",
+    "village": "Udaypur",
+    "block": "Borgaon",
+    "mobile": "9864019283",
+    "bank_account": "8505669675999",
+    "ifsc": "CNRB0004417",
+    "background": "Already submitted an application that is currently PENDING; panicked because she did not get a phone call and tries to apply again on the same mobile.",
+    "dialect_and_tone": "Anxious ('I applied yesterday but no money received, let me submit another application').",
+    "goal": "Attempts to submit a second application on the same mobile number.",
+    "expected_result": "Submission blocked: portal detects active application and informs applicant they must withdraw first.",
+    "db_assertions": [
+      "Exactly 1 application exists for mobile '9864019283'",
+      "Duplicate application submission is prevented"
+    ]
+  },
+  {
+    "id": "persona_hemkanti",
+    "name": "Hemkanti Saikia",
+    "role": "Citizen (Withdrawal & Correction Lifecycle)",
+    "age": 72,
+    "dob": "05/01/1954",
+    "gender": "Female",
+    "marital_status": "Widowed",
+    "village": "Sialmari",
+    "block": "Khelua",
+    "mobile": "9954088712",
+    "bank_account_old": "128000212000",
+    "bank_account_new": "1570246629999",
+    "ifsc": "UCBA0001522",
+    "background": "Realized she entered wrong bank details on her first application; needs to withdraw the pending application and re-apply with corrected SBI pension account.",
+    "dialect_and_tone": "Practical, urgent ('Made mistake in bank account, need to cancel previous and re-apply').",
+    "goal": "Withdraw existing PENDING application, then submit fresh application with correct bank details.",
+    "expected_result": "Original application marked WITHDRAWN with audit entry; new application successfully created with PENDING status.",
+    "db_assertions": [
+      "First application has status = 'WITHDRAWN' with audit log action 'WITHDRAW'",
+      "Second application successfully created with status = 'PENDING'",
+      "Updated bank account correctly stored"
+    ]
+  },
+  {
+    "id": "persona_ramen",
+    "name": "Ramen Das",
+    "role": "Citizen (Invalid Bank Details Rejection)",
+    "age": 63,
+    "dob": "11/11/1962",
+    "gender": "Male",
+    "marital_status": "Married",
+    "village": "Dighaljan",
+    "block": "Rajapara",
+    "mobile": "9706054321",
+    "bank_account": "12345",
+    "ifsc": "SBI001",
+    "background": "Elderly applicant confused about banking codes who enters a 5-digit account number and malformed IFSC.",
+    "dialect_and_tone": "Confused about banking terms ('My bank is SBI and number is 12345').",
+    "goal": "Attempts submission with invalid bank account length and improper IFSC format.",
+    "expected_result": "Rejected at validation layer with specific error messages for bank account and IFSC.",
+    "db_assertions": [
+      "No record inserted into applications table",
+      "Validation errors explicitly describe format rules"
+    ]
+  },
+  {
+    "id": "persona_officer_barua",
+    "name": "Officer Barua",
+    "role": "Block Officer (Review & Approval)",
+    "officer_user": "bdo_sonari",
+    "block": "Sonari",
+    "background": "Block Development Officer for Sonari block reviewing pending applications approaching SLA deadline.",
+    "dialect_and_tone": "Official, thorough, procedural administrative tone.",
+    "goal": "Inspect operational dashboard, view application queue for Sonari block, review applicant age-proof details, and formally approve eligible case with justification note.",
+    "expected_result": "Application marked APPROVED, decided_by = 'officer:bdo_sonari', decided_at recorded, audit log entry saved, approval SMS dispatched.",
+    "db_assertions": [
+      "Application status changed from 'PENDING' to 'APPROVED'",
+      "decided_by is 'officer:bdo_sonari'",
+      "Audit log has action 'APPROVED' with officer note",
+      "SMS notification logged"
+    ]
+  },
+  {
+    "id": "persona_officer_gogoi",
+    "name": "Officer Gogoi",
+    "role": "Block Officer (Review & Rejection)",
+    "officer_user": "welfare_officer_rajapara",
+    "block": "Rajapara",
+    "background": "Verification officer reviewing a case with mismatched territorial jurisdiction or irregular age proof.",
+    "dialect_and_tone": "Official, rigorous compliance evaluation.",
+    "goal": "Inspect application details and record a formal REJECTION with reason in audit log.",
+    "expected_result": "Application marked REJECTED, decided_by recorded, audit log entry saved, rejection SMS dispatched.",
+    "db_assertions": [
+      "Application status changed from 'PENDING' to 'REJECTED'",
+      "decided_by is 'officer:welfare_officer_rajapara'",
+      "Audit log has action 'REJECTED' with reason note",
+      "Rejection SMS logged"
+    ]
+  }
+]
