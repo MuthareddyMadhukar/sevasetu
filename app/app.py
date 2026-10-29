@@ -703,9 +703,18 @@ app.register_blueprint(citizen_server.create_blueprint("/mcp/citizen"))
 app.register_blueprint(officer_server.create_blueprint("/mcp/officer", auth_validator=officer_auth_validator))
 
 
+def get_base_url():
+    proto = request.headers.get("X-Forwarded-Proto") or ("https" if request.is_secure else "http")
+    host = request.headers.get("X-Forwarded-Host") or request.host
+    configured = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
+    if configured and "localhost" not in configured:
+        return configured
+    return f"{proto}://{host}"
+
+
 @app.route("/mcp")
 def mcp_index():
-    base = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
+    base = get_base_url()
     return {
         "status": "online",
         "description": "Sewa Setu Model Context Protocol (MCP) Streamable HTTP Gateway",
@@ -736,7 +745,7 @@ def eval_dashboard():
         except Exception as e:
             app.logger.error(f"Error running initial evals: {e}")
 
-    base = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
+    base = get_base_url()
     return render_template(
         "eval_dashboard.html",
         summary=eval_runner.summary,
@@ -744,6 +753,7 @@ def eval_dashboard():
         personas=PERSONAS,
         public_base_url=base
     )
+
 
 
 @app.route("/api/eval/run", methods=["POST"])
